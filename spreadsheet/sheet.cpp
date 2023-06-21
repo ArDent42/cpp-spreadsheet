@@ -42,14 +42,7 @@ const CellInterface* Sheet::GetCell(Position pos) const {
 	return nullptr;
 }
 CellInterface* Sheet::GetCell(Position pos) {
-	if (!pos.IsValid()) {
-		throw InvalidPositionException("Invalid position");
-	}
-	Size size = GetPrintableSize();
-	if (pos.row < size.rows && pos.col < size.cols) {
-		return sheet_[pos.row][pos.col].get();
-	}
-	return nullptr;
+	return const_cast<CellInterface*>(const_cast<const Sheet*>(this)->GetCell(pos));
 }
 
 void Sheet::ClearCell(Position pos) {
