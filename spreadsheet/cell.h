@@ -1,36 +1,38 @@
 #pragma once
 
-#include "common.h"
-#include "formula.h"
-
+#include <string>
 #include <functional>
 #include <unordered_set>
+#include "common.h"
+#include "formula.h"
+#include "sheet.h"
 
 class Sheet;
 
-class Cell : public CellInterface {
+class Cell: public CellInterface {
+private:
+	class Impl;
+	class EmptyImpl;
+	class TextImpl;
+	class FormulaImpl;
+	std::unique_ptr<Impl> impl_;
+	Sheet &sheet_;
+	std::unordered_set<Cell*> in_refs_;
+	std::unordered_set<Cell*> out_refs_;
 public:
-    Cell(Sheet& sheet);
-    ~Cell();
-
-    void Set(std::string text);
-    void Clear();
-
-    Value GetValue() const override;
-    std::string GetText() const override;
-    std::vector<Position> GetReferencedCells() const override;
-
-    bool IsReferenced() const;
+	Cell(Sheet &sheet_);
+	~Cell();
+	void Set(std::string text);
+	void Clear();
+	Value GetValue() const override;
+	std::string GetText() const override;
+	std::vector<Position> GetReferencedCells() const override;
+	bool IsReferenced() const;
 
 private:
-    class Impl;
-    class EmptyImpl;
-    class TextImpl;
-    class FormulaImpl;
-
-    std::unique_ptr<Impl> impl_;
-
-    // Добавьте поля и методы для связи с таблицей, проверки циклических 
-    // зависимостей, графа зависимостей и т. д.
+	void ClearAllCache();
+	void UpdateRefs();
+	bool CheckCircleDependency(const Impl &impl) const;
+	bool CheckCircleDependency(const CellInterface *next_cell) const;
 
 };
